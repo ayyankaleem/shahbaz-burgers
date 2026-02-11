@@ -150,6 +150,28 @@
             display: none;
             border: 1px solid #444;
         }
+
+        /* Media Query for Admin Dashboard */
+        @media (max-width: 600px) {
+            .stats-bar {
+                grid-template-columns: 1fr !important;
+            }
+
+            .list-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .item-actions {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .item-actions button {
+                flex: 1;
+            }
+        }
     </style>
 </head>
 
@@ -432,8 +454,8 @@
                         <span style="color: var(--primary);">Rs. ${p.price}</span>
                     </div>
                     <div class="item-actions">
-                        <button onclick="editProduct(${p.id})">Edit</button>
-                        <button class="btn-danger" onclick="deleteProduct(${p.id})">Delete</button>
+                        <button onclick="editProduct('${p.id}')">Edit</button>
+                        <button class="btn-danger" onclick="deleteProduct('${p.id}')">Delete</button>
                     </div>
                 `;
                 list.appendChild(item);
@@ -443,7 +465,7 @@
         function saveProduct() {
             const id = document.getElementById('edit-id').value;
             const product = {
-                id: id ? parseInt(id) : Date.now(),
+                id: id || Date.now(),
                 name: document.getElementById('p-name').value,
                 price: parseInt(document.getElementById('p-price').value),
                 category: document.getElementById('p-category').value,
@@ -499,7 +521,10 @@
             let pendingCount = 0;
 
             orders.forEach(o => {
-                const orderDate = new Date(o.id).toLocaleDateString();
+                let dateObj = o.createdAt && o.createdAt.toDate ? o.createdAt.toDate() : new Date(o.id);
+                if (isNaN(dateObj.getTime())) dateObj = new Date(); // Fallback
+
+                const orderDate = dateObj.toLocaleDateString();
                 if (orderDate === today) {
                     todayTotal += parseInt(o.total) || 0;
                 }
@@ -531,8 +556,8 @@
                         <p style="color: #ccc; font-style: italic;">Address: ${o.address}</p>
                     </div>
                     <div class="item-actions">
-                        ${o.status === 'Pending' ? `<button class="btn-success" onclick="completeOrder(${o.id})">Complete</button>` : '<span style="color:green; margin-right: 10px;">Completed</span>'}
-                        <button class="btn-danger" onclick="deleteOrder(${o.id})"><i class="fas fa-trash"></i></button>
+                        ${o.status === 'Pending' ? `<button class="btn-success" onclick="completeOrder('${o.id}')">Complete</button>` : '<span style="color:green; margin-right: 10px;">Completed</span>'}
+                        <button class="btn-danger" onclick="deleteOrder('${o.id}')"><i class="fas fa-trash"></i></button>
                     </div>
                 `;
                 list.appendChild(item);

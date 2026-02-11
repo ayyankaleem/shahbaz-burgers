@@ -488,10 +488,32 @@ footer {
     }
 }
 
-/* Responsive */
+/* Responsive Design Improvements */
+
+@media (max-width: 1024px) {
+    h1 {
+        font-size: 3rem;
+    }
+
+    .hero-container {
+        gap: 30px;
+    }
+}
+
 @media (max-width: 900px) {
     h1 {
-        font-size: 2.8rem;
+        font-size: 2.5rem;
+        text-align: center;
+    }
+
+    h2 {
+        font-size: 2rem;
+        text-align: center;
+    }
+
+    .hero {
+        height: auto;
+        padding: 120px 0 60px;
     }
 
     .hero-container {
@@ -501,27 +523,84 @@ footer {
 
     .hero-btns {
         justify-content: center;
+        flex-wrap: wrap;
     }
 
     .stats {
         justify-content: center;
+        flex-wrap: wrap;
+        gap: 20px;
     }
 
     .footer-container {
         grid-template-columns: 1fr;
-        gap: 30px;
+        gap: 40px;
+        text-align: center;
+    }
+
+    .social-links {
+        justify-content: center;
+    }
+
+    .footer-col ul li i {
+        margin-right: 10px;
     }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 600px) {
+    h1 {
+        font-size: 2rem;
+    }
 
-    .nav-links,
+    .hero-desc {
+        font-size: 0.9rem;
+    }
+
+    .container {
+        padding: 0 15px;
+    }
+
+    .menu-grid {
+        grid-template-columns: 1fr;
+        /* Force single column on very small phones for focus */
+        gap: 20px;
+    }
+
+    .category-title {
+        font-size: 1.5rem;
+        justify-content: center;
+    }
+
     .btn {
-        display: none;
+        width: 100%;
+        /* Full width buttons on mobile feel more "app-like" */
+        text-align: center;
+        padding: 12px 20px;
     }
 
-    /* Simplified mobile nav for demo */
-    .mobile-toggle {
-        display: block;
+    .hero-btns {
+        flex-direction: column;
+        width: 100%;
     }
+
+    .nav-container {
+        padding: 0 15px;
+    }
+
+    .logo-text {
+        font-size: 1.4rem;
+    }
+}
+
+/* Fix for overlapping content */
+section {
+    overflow: hidden;
+    position: relative;
+}
+
+/* Ensure images don't break layout */
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
 }
