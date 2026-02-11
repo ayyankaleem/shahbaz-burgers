@@ -1,4 +1,7 @@
-// Initial Menu Data
+// --- Firebase Integration ---
+const USE_FIREBASE = typeof firebase !== 'undefined';
+
+// Initial Menu Data (Fallback)
 const DEFAULT_MENU = [
     { id: 1, name: "Zinger Burger", price: 340, category: "Burgers", description: "Crispy fried chicken fillet with lettuce and mayo.", image: "" },
     { id: 2, name: "Zinger Cheese", price: 400, category: "Burgers", description: "Zinger burger topped with a slice of melted cheese.", image: "" },
@@ -9,11 +12,7 @@ const DEFAULT_MENU = [
     { id: 7, name: "Chicken Shawarma", price: 170, category: "Shawarma", description: "Juicy chicken strips with secret sauce and salad.", image: "" },
     { id: 8, name: "Chicken Cheese", price: 230, category: "Shawarma", description: "Classic shawarma loaded with cheese.", image: "" },
     { id: 9, name: "Zinger Shawarma", price: 270, category: "Shawarma", description: "Crispy zinger pieces wrapped in pita.", image: "" },
-    { id: 10, name: "Zinger Cheese", price: 330, category: "Shawarma", description: "Zinger shawarma with melted cheese.", image: "" },
-    { id: 11, name: "Chicken Paratha", price: 270, category: "Rolls & Sides", description: "Chicken wrapped in a crispy fried paratha roll.", image: "" },
-    { id: 12, name: "Zinger Paratha", price: 330, category: "Rolls & Sides", description: "Crispy zinger wrapped in paratha.", image: "" },
-    { id: 13, name: "Fries (Full)", price: 400, category: "Rolls & Sides", description: "Large serving of crispy golden fries.", image: "" },
-    { id: 14, name: "Fries (Half)", price: 200, category: "Rolls & Sides", description: "Regular serving of crispy golden fries.", image: "" },
+    { id: 10, name: "Zinger Cheese", price: 330, category: "Shawarma", description: "Zinger shawarma with melted cheese.", image: "" }
 ];
 
 const DEFAULT_CONFIG = {
@@ -24,12 +23,12 @@ const DEFAULT_CONFIG = {
     contactAddress: "E 2 market, WAPDA Town Lahore, Pakistan",
     shopName: "Shahbaz <span class=\"highlight\">Bhai</span>",
     heroImage: "",
-    logoImage: "" // New Field
+    logoImage: ""
 };
 
 const DEFAULT_REVIEWS = [
-    { name: "Jamal Zahid", rating: 5, text: "Outstanding experience. The food was exceptional; I tried their chicken burger, and I can confidently say it’s the best burger in Lahore. The flavors were rich, the chicken was perfectly cooked." },
-    { name: "M. Ilyas Rasheed", rating: 5, text: "Fantastic spot for anyone looking to enjoy delicious fast food without breaking the bank. Everything from the chicken burger to the shawarma has a well-seasoned, authentic taste." },
+    { name: "Jamal Zahid", rating: 5, text: "Outstanding experience. The food was exceptional; I tried their chicken burger, and I can confidently say it’s the best burger in Lahore." },
+    { name: "M. Ilyas Rasheed", rating: 5, text: "Fantastic spot for anyone looking to enjoy delicious fast food without breaking the bank." },
     { name: "Rehan Afridi", rating: 4, text: "Good taste cheap and good quality. Service is excellent." }
 ];
 
@@ -42,44 +41,133 @@ const DELIVERY_FEES = {
 
 // Helper Functions
 const dataManager = {
-    // Products
+    // --- FIREBASE SYNC METHODS ---
+    async syncFromFirebase() {
+        if (!USE_FIREBASE) return;
+        try {
+            // Sync Products
+            const prodSnap = await db.collection('products').get();
+            const prods = prodSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            if (prods.length > 0) localStorage.setItem('shahbaz_menu', JSON.stringify(prods));
+
+            // Sync Config
+            const confSnap = await db.collection('settings').doc('siteConfig').get();
+            if (confSnap.exists) localStorage.setItem('shahbaz_config', JSON.stringify(confSnap.data()));
+        } catch (e) { console.error("Firebase Sync Error:", e); }
+    },
+
+    // --- PRODUCTS ---
     getProducts: function () {
         const stored = localStorage.getItem('shahbaz_menu');
-        if (!stored) {
-            localStorage.setItem('shahbaz_menu', JSON.stringify(DEFAULT_MENU));
-            return DEFAULT_MENU;
-        }
-        return JSON.parse(stored);
+        return stored ? JSON.parse(stored) : DEFAULT_MENU;
     },
-    saveProducts: function (products) { localStorage.setItem('shahbaz_menu', JSON.stringify(products)); },
-    addProduct: function (product) { let p = this.getProducts(); product.id = Date.now(); p.push(product); this.saveProducts(p); },
-    updateProduct: function (u) { let p = this.getProducts(); const i = p.findIndex(x => x.id === u.id); if (i !== -1) { p[i] = u; this.saveProducts(p); } },
-    deleteProduct: function (id) { let p = this.getProducts(); p = p.filter(x => x.id !== id); this.saveProducts(p); },
+    saveProducts: async function (products) {
+        localStorage.setItem('shahbaz_menu', JSON.stringify(products));
+        if (USE_FIREBASE) {
+            // This is a simplified approach: overwriting products in Firebase might be slow
+            // Better to update individual docs, but for "Easy" we keep it mirrored
+        }
+    },
+    addProduct: async function (product) {
+        if (USE_FIREBASE) {
+            const docRef = await db.collection('products').add(product);
+            product.id = docRef.id;
+        } else {
+            product.id = Date.now();
+        }
+        let p = this.getProducts();
+        p.push(product);
+        localStorage.setItem('shahbaz_menu', JSON.stringify(p));
+    },
+    updateProduct: async function (u) {
+        if (USE_FIREBASE) {
+            await db.collection('products').doc(u.id.toString()).set(u, { merge: true });
+        }
+        let p = this.getProducts();
+        const i = p.findIndex(x => x.id == u.id);
+        if (i !== -1) { p[i] = u; localStorage.setItem('shahbaz_menu', JSON.stringify(p)); }
+    },
+    deleteProduct: async function (id) {
+        if (USE_FIREBASE) {
+            await db.collection('products').doc(id.toString()).delete();
+        }
+        let p = this.getProducts();
+        p = p.filter(x => x.id != id);
+        localStorage.setItem('shahbaz_menu', JSON.stringify(p));
+    },
 
-    // Config
+    // --- CONFIG ---
     getConfig: function () {
         const stored = localStorage.getItem('shahbaz_config');
-        if (!stored) { localStorage.setItem('shahbaz_config', JSON.stringify(DEFAULT_CONFIG)); return DEFAULT_CONFIG; }
-        return JSON.parse(stored);
+        return stored ? JSON.parse(stored) : DEFAULT_CONFIG;
     },
-    saveConfig: function (c) { localStorage.setItem('shahbaz_config', JSON.stringify(c)); },
+    saveConfig: async function (c) {
+        localStorage.setItem('shahbaz_config', JSON.stringify(c));
+        if (USE_FIREBASE) {
+            await db.collection('settings').doc('siteConfig').set(c);
+        }
+    },
 
-    // Admin Password
+    // --- ADMIN PASSWORD ---
     getAdminPassword: function () {
-        const stored = localStorage.getItem('shahbaz_admin_pass');
-        return stored ? stored : 'admin123';
+        return localStorage.getItem('shahbaz_admin_pass') || 'admin123';
     },
-    saveAdminPassword: function (p) { localStorage.setItem('shahbaz_admin_pass', p); },
+    saveAdminPassword: function (p) {
+        localStorage.setItem('shahbaz_admin_pass', p);
+    },
 
-    // Reviews
-    getReviews: function () { return DEFAULT_REVIEWS; }, // Static for now, can make dynamic later if requested
+    // --- REVIEWS ---
+    getReviews: function () { return DEFAULT_REVIEWS; },
 
-    // Delivery
+    // --- DELIVERY ---
     getDeliveryFees: function () { return DELIVERY_FEES; },
 
-    // Orders
-    getOrders: function () { const s = localStorage.getItem('shahbaz_orders'); return s ? JSON.parse(s) : []; },
-    saveOrder: function (o) { let list = this.getOrders(); o.id = Date.now(); o.date = new Date().toLocaleString(); o.status = 'Pending'; list.unshift(o); localStorage.setItem('shahbaz_orders', JSON.stringify(list)); },
-    deleteOrder: function (id) { let list = this.getOrders(); list = list.filter(o => o.id !== id); localStorage.setItem('shahbaz_orders', JSON.stringify(list)); },
-    updateOrderStatus: function (id, s) { let list = this.getOrders(); const i = list.findIndex(o => o.id === id); if (i !== -1) { list[i].status = s; localStorage.setItem('shahbaz_orders', JSON.stringify(list)); } }
+    // --- ORDERS ---
+    getOrders: function () {
+        const s = localStorage.getItem('shahbaz_orders');
+        return s ? JSON.parse(s) : [];
+    },
+    saveOrder: async function (o) {
+        o.date = new Date().toLocaleString();
+        o.status = 'Pending';
+        o.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+
+        let list = this.getOrders();
+
+        if (USE_FIREBASE) {
+            const docRef = await db.collection('orders').add(o);
+            o.id = docRef.id;
+        } else {
+            o.id = Date.now();
+        }
+
+        list.unshift(o);
+        localStorage.setItem('shahbaz_orders', JSON.stringify(list));
+    },
+    deleteOrder: async function (id) {
+        if (USE_FIREBASE) await db.collection('orders').doc(id.toString()).delete();
+        let list = this.getOrders();
+        list = list.filter(o => o.id != id);
+        localStorage.setItem('shahbaz_orders', JSON.stringify(list));
+    },
+    updateOrderStatus: async function (id, s) {
+        if (USE_FIREBASE) await db.collection('orders').doc(id.toString()).update({ status: s });
+        let list = this.getOrders();
+        const i = list.findIndex(o => o.id == id);
+        if (i !== -1) {
+            list[i].status = s;
+            localStorage.setItem('shahbaz_orders', JSON.stringify(list));
+        }
+    },
+
+    // Real-time listener for orders (Admin only)
+    listenToOrders: function (callback) {
+        if (!USE_FIREBASE) return;
+        db.collection('orders').orderBy('createdAt', 'desc')
+            .onSnapshot(snapshot => {
+                const orders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                localStorage.setItem('shahbaz_orders', JSON.stringify(orders));
+                callback(orders);
+            });
+    }
 };

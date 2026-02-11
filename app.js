@@ -1,7 +1,12 @@
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    // 1. Sync from Cloud Database
+    if (typeof dataManager !== 'undefined' && dataManager.syncFromFirebase) {
+        await dataManager.syncFromFirebase();
+    }
+
     renderMenu();
     loadSiteConfig();
-    renderReviews(); // New Function
+    renderReviews();
     setupOrderLogic();
 });
 
