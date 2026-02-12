@@ -73,19 +73,39 @@ const dataManager = {
     // --- PRODUCTS ---
     getProducts: function () {
         const stored = localStorage.getItem('shahbaz_menu');
-        return stored ? JSON.parse(stored) : DEFAULT_MENU;
+        const list = stored ? JSON.parse(stored) : DEFAULT_MENU;
+        // Sort by order field, fallback to ID
+        return list.sort((a, b) => (a.order || 0) - (b.order || 0) || (a.id - b.id));
     },
     saveProducts: async function (products) {
         localStorage.setItem('shahbaz_menu', JSON.stringify(products));
         if (USE_FIREBASE) {
-            // This is a simplified approach: overwriting products in Firebase might be slow
-            // Better to update individual docs, but for "Easy" we keep it mirrored
+            // No direct mirror here yet
+        }
+    },
+    reorderProducts: async function (newList) {
+        // Assign new order indices based on current position in the list
+        const updatedList = newList.map((p, index) => ({ ...p, order: index }));
+        localStorage.setItem('shahbaz_menu', JSON.stringify(updatedList));
+
+        if (USE_FIREBASE) {
+            // Update each product's order in Firebase
+            const batch = db.batch();
+            updatedList.forEach(p => {
+                const docRef = db.collection('products').doc(p.id.toString());
+                batch.update(docRef, { order: p.order });
+            });
+            await batch.commit();
         }
     },
     addProduct: async function (product) {
         // Optimistic UI: Update local first
         if (!product.id) product.id = 'temp_' + Date.now();
         let p = this.getProducts();
+
+        // Assign order to be at the end
+        product.order = p.length > 0 ? Math.max(...p.map(x => x.order || 0)) + 1 : 0;
+
         p.push(product);
         localStorage.setItem('shahbaz_menu', JSON.stringify(p));
 
