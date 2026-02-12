@@ -183,36 +183,52 @@ function renderReviews() {
     });
 }
 
-function addToCart(id) {
-    const product = dataManager.getProducts().find(p => p.id === id);
+window.addToCart = function (id) {
+    // Ensure ID comparison works (string vs number)
+    const products = dataManager.getProducts();
+    const product = products.find(p => p.id.toString() === id.toString());
+
     if (product) {
-        const existing = cart.find(item => item.product.id === id);
+        const existing = cart.find(item => item.product.id.toString() === id.toString());
         if (existing) {
             existing.quantity++;
         } else {
             cart.push({ product: product, quantity: 1 });
         }
         updateCartUI();
-        // Optional: toast notification
+
+        // Visual feedback
+        const fab = document.getElementById('cart-fab');
+        if (fab) {
+            fab.style.transform = 'scale(1.2)';
+            setTimeout(() => fab.style.transform = 'scale(1)', 200);
+        }
     }
 }
 
 function updateCartUI() {
     const fab = document.getElementById('cart-fab');
+    const manualBtn = document.getElementById('floating-order');
     const count = cart.reduce((sum, item) => sum + item.quantity, 0);
+
     if (count > 0) {
-        fab.style.display = 'block';
+        fab.style.display = 'flex';
+        setTimeout(() => fab.classList.add('active'), 10);
         document.getElementById('cart-count').innerText = count;
+        if (manualBtn) manualBtn.style.display = 'none'; // Hide the one that just scrolls
     } else {
-        fab.style.display = 'none';
+        fab.classList.remove('active');
+        setTimeout(() => fab.style.display = 'none', 500);
+        if (manualBtn) manualBtn.style.display = 'flex';
     }
 }
 
 function setupOrderLogic() {
     const fab = document.createElement('div');
     fab.id = 'cart-fab';
-    fab.style.cssText = 'position: fixed; bottom: 30px; right: 30px; background: var(--primary-color); color: #000; padding: 15px 25px; border-radius: 50px; font-weight: bold; cursor: pointer; display: none; box-shadow: 0 10px 20px rgba(0,0,0,0.3); z-index: 2000;';
-    fab.innerHTML = '<i class="fas fa-shopping-cart"></i> View Order (<span id="cart-count">0</span>)';
+    fab.className = 'floating-order-btn'; // Use our premium class
+    fab.style.cssText = 'display: none; cursor: pointer; transform: translateY(150px); transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);';
+    fab.innerHTML = '<i class="fas fa-shopping-cart"></i> <span>View Bag (<span id="cart-count">0</span>)</span>';
     fab.onclick = showOrderModal;
     document.body.appendChild(fab);
 }
@@ -220,7 +236,7 @@ function setupOrderLogic() {
 // Global variable for delivery fee
 let currentDeliveryFee = 0;
 
-function showOrderModal() {
+window.showOrderModal = function () {
     const fees = dataManager.getDeliveryFees();
     currentDeliveryFee = fees['Wapda Town Phase 1']; // Default
 
@@ -253,24 +269,24 @@ function showOrderModal() {
     const modalHTML = `
         <div id="order-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 3000; display: flex; align-items: center; justify-content: center;">
             <div style="background: #1E1E1E; padding: 25px; border-radius: 15px; width: 90%; max-width: 450px; color: #fff; max-height: 90vh; overflow-y: auto;">
-                <h2 style="color: var(--primary-color); margin-top:0;">Your Bag</h2>
+                <h2 style="color: var(--primary); margin-top:0;">Your Bag</h2>
                 
-                <div id="modal-items-list" style="background: #252525; padding: 10px; border-radius: 5px; margin-bottom: 15px; max-height: 150px; overflow-y: auto;">
+                <div id="modal-items-list" style="background: rgba(255,255,255,0.03); padding: 15px; border-radius: 12px; margin-bottom: 20px; max-height: 250px; overflow-y: auto;">
                     ${renderCartItems()}
                 </div>
 
                 <div style="margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center;">
                     <label>Delivery Area:</label>
-                    <select id="delivery-area" onchange="updateDeliveryFee(this)" style="padding: 5px; background: #333; color: white; border: 1px solid #444; border-radius: 5px;">
+                    <select id="delivery-area" onchange="updateDeliveryFee(this)" style="padding: 10px; background: #333; color: white; border: 1px solid #444; border-radius: 8px;">
                         ${areasOptions}
                     </select>
                 </div>
 
-                <div style="background: #252525; padding: 10px; border-radius: 5px; margin-bottom: 15px;">
+                <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; margin-bottom: 20px;">
                     <p style="display: flex; justify-content: space-between;"><span>Subtotal:</span> <span>Rs. ${calculateTotal() - currentDeliveryFee}</span></p>
-                    <p style="display: flex; justify-content: space-between;"><span>Delivery:</span> <span id="delivery-display" style="color: orange;">Rs. ${currentDeliveryFee}</span></p>
-                    <hr style="border-color: #444;">
-                    <p style="display: flex; justify-content: space-between; font-size: 1.2rem; margin-top: 5px; color: var(--primary-color);">
+                    <p style="display: flex; justify-content: space-between;"><span>Delivery:</span> <span id="delivery-display" style="color: var(--primary);">Rs. ${currentDeliveryFee}</span></p>
+                    <hr style="border-color: rgba(255,255,255,0.1); margin: 10px 0;">
+                    <p style="display: flex; justify-content: space-between; font-size: 1.4rem; margin-top: 5px; color: var(--primary);">
                         <strong>Total:</strong> <strong id="total-display">Rs. ${calculateTotal()}</strong>
                     </p>
                 </div>
@@ -320,12 +336,12 @@ window.updateDeliveryFee = function (selectInfo) {
     document.getElementById('total-display').innerText = `Rs. ${total}`;
 };
 
-function closeModal() {
+window.closeModal = function () {
     const m = document.getElementById('order-modal');
     if (m) m.remove();
 }
 
-function submitOrder() {
+window.submitOrder = function () {
     const name = document.getElementById('ord-name').value;
     const phone = document.getElementById('ord-phone').value;
     const address = document.getElementById('ord-address').value;
