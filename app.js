@@ -16,23 +16,21 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 3. Ultra-Dynamic Scroll Effect
-    let lastScroll = 0;
+    // 3. Ultra-Dynamic Scroll Effect (Unified Button Logic)
     window.addEventListener('scroll', () => {
         const currentScroll = window.scrollY;
         const nav = document.querySelector('.navbar');
-        const floatingBtn = document.getElementById('floating-order');
+        const btn = document.getElementById('floating-order');
 
-        // Hide navbar on scroll down, show on scroll up/top
+        // Hide navbar on scroll down
         if (currentScroll > 100) {
             nav.classList.add('hidden');
-            floatingBtn.classList.add('active');
+            btn.classList.add('active'); // Show Unified Button
         } else {
             nav.classList.remove('hidden');
-            floatingBtn.classList.remove('active');
+            // Keep button visible if cart has items even at top
+            if (cart.length === 0) btn.classList.remove('active');
         }
-
-        lastScroll = currentScroll;
     });
 });
 
@@ -197,40 +195,44 @@ window.addToCart = function (id) {
         }
         updateCartUI();
 
-        // Visual feedback
-        const fab = document.getElementById('cart-fab');
-        if (fab) {
-            fab.style.transform = 'scale(1.2)';
-            setTimeout(() => fab.style.transform = 'scale(1)', 200);
+        // Visual feedback on the button
+        const btn = document.getElementById('floating-order');
+        if (btn) {
+            btn.style.transform = 'scale(1.15)';
+            btn.style.background = '#fff';
+            setTimeout(() => {
+                btn.style.transform = '';
+                btn.style.background = '';
+            }, 300);
         }
     }
 }
 
 function updateCartUI() {
-    const fab = document.getElementById('cart-fab');
-    const manualBtn = document.getElementById('floating-order');
+    const btn = document.getElementById('floating-order');
+    if (!btn) return;
+
     const count = cart.reduce((sum, item) => sum + item.quantity, 0);
 
     if (count > 0) {
-        fab.style.display = 'flex';
-        setTimeout(() => fab.classList.add('active'), 10);
-        document.getElementById('cart-count').innerText = count;
-        if (manualBtn) manualBtn.style.display = 'none'; // Hide the one that just scrolls
+        // Change to "View Bag" Mode
+        btn.classList.add('active');
+        btn.removeAttribute('href'); // Disable scroll link
+        btn.style.cursor = 'pointer';
+        btn.onclick = showOrderModal;
+        btn.innerHTML = `<i class="fas fa-shopping-cart"></i> <span>View Bag (${count})</span>`;
     } else {
-        fab.classList.remove('active');
-        setTimeout(() => fab.style.display = 'none', 500);
-        if (manualBtn) manualBtn.style.display = 'flex';
+        // Change back to "Order Now" Mode
+        btn.setAttribute('href', '#menu');
+        btn.onclick = null;
+        btn.innerHTML = `<i class="fas fa-shopping-cart"></i> <span>Order Now</span>`;
+        if (window.scrollY <= 100) btn.classList.remove('active');
     }
 }
 
 function setupOrderLogic() {
-    const fab = document.createElement('div');
-    fab.id = 'cart-fab';
-    fab.className = 'floating-order-btn'; // Use our premium class
-    fab.style.cssText = 'display: none; cursor: pointer; transform: translateY(150px); transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);';
-    fab.innerHTML = '<i class="fas fa-shopping-cart"></i> <span>View Bag (<span id="cart-count">0</span>)</span>';
-    fab.onclick = showOrderModal;
-    document.body.appendChild(fab);
+    // Initial call to set state
+    updateCartUI();
 }
 
 // Global variable for delivery fee
