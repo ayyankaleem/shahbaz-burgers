@@ -83,31 +83,46 @@ const dataManager = {
         }
     },
     addProduct: async function (product) {
-        if (USE_FIREBASE) {
-            const docRef = await db.collection('products').add(product);
-            product.id = docRef.id;
-        } else {
-            product.id = Date.now();
-        }
+        // Optimistic UI: Update local first
+        if (!product.id) product.id = 'temp_' + Date.now();
         let p = this.getProducts();
         p.push(product);
         localStorage.setItem('shahbaz_menu', JSON.stringify(p));
+
+        if (USE_FIREBASE) {
+            const docRef = await db.collection('products').add(product);
+            // Replace temp ID with real ID in background
+            product.id = docRef.id;
+            let list = this.getProducts();
+            const idx = list.findIndex(x => x.id === 'temp_' + (product.id.split('_')[1] || ''));
+            if (idx !== -1) {
+                list[idx].id = docRef.id;
+                localStorage.setItem('shahbaz_menu', JSON.stringify(list));
+            }
+        }
     },
     updateProduct: async function (u) {
+        // Update local immediately
+        let p = this.getProducts();
+        const i = p.findIndex(x => x.id == u.id);
+        if (i !== -1) {
+            p[i] = u;
+            localStorage.setItem('shahbaz_menu', JSON.stringify(p));
+        }
+
         if (USE_FIREBASE) {
             await db.collection('products').doc(u.id.toString()).set(u, { merge: true });
         }
-        let p = this.getProducts();
-        const i = p.findIndex(x => x.id == u.id);
-        if (i !== -1) { p[i] = u; localStorage.setItem('shahbaz_menu', JSON.stringify(p)); }
     },
     deleteProduct: async function (id) {
-        if (USE_FIREBASE) {
-            await db.collection('products').doc(id.toString()).delete();
-        }
+        // Update local immediately
         let p = this.getProducts();
         p = p.filter(x => x.id != id);
         localStorage.setItem('shahbaz_menu', JSON.stringify(p));
+
+        if (USE_FIREBASE) {
+            await db.collection('products').doc(id.toString()).delete();
+        }
     },
 
     // --- CONFIG ---

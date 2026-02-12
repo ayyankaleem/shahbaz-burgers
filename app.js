@@ -1,13 +1,18 @@
-document.addEventListener('DOMContentLoaded', async () => {
-    // 1. Sync from Cloud Database
-    if (typeof dataManager !== 'undefined' && dataManager.syncFromFirebase) {
-        await dataManager.syncFromFirebase();
-    }
-
+document.addEventListener('DOMContentLoaded', () => {
+    // 1. Instant Render from Cache (No Lag)
     renderMenu();
     loadSiteConfig();
     renderReviews();
     setupOrderLogic();
+
+    // 2. Background Sync from Cloud
+    if (typeof dataManager !== 'undefined' && dataManager.syncFromFirebase) {
+        dataManager.syncFromFirebase().then(() => {
+            // Refresh with latest data from cloud
+            renderMenu();
+            loadSiteConfig();
+        });
+    }
 });
 
 let cart = []; // Now stores objects: { product, quantity }
