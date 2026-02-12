@@ -67,15 +67,21 @@ function renderMenu() {
             card.className = 'menu-card fade-in';
             card.style.animationDelay = `${index * 0.1}s`;
 
-            // Premium Icon-Only Menu (Removing all other pics as requested)
-            let icon = 'fa-hamburger';
-            if (product.name.toLowerCase().includes('shawarma')) icon = 'fa-scroll';
-            if (product.name.toLowerCase().includes('sandwich')) icon = 'fa-bread-slice';
-            if (product.name.toLowerCase().includes('drink') || product.name.toLowerCase().includes('pepsi')) icon = 'fa-glass-whiskey';
+            let imageTag = "";
+            if (product.image && product.image.length > 50) {
+                // Restore images with smooth fade-in reveal
+                imageTag = `<img src="${product.image}" loading="lazy" onload="this.style.opacity=1" style="opacity:0; transition: opacity 0.8s ease; width:100%; height:100%; object-fit:cover;" alt="${product.name}">`;
+            } else {
+                // Premium Icon Fallback if no image exists
+                let icon = 'fa-hamburger';
+                if (product.name.toLowerCase().includes('shawarma')) icon = 'fa-scroll';
+                if (product.name.toLowerCase().includes('sandwich')) icon = 'fa-bread-slice';
+                if (product.name.toLowerCase().includes('drink')) icon = 'fa-glass-whiskey';
 
-            const imageTag = `<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:6rem;background: radial-gradient(circle, rgba(255,215,0,0.08) 0%, transparent 70%);">
+                imageTag = `<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:6rem;background: radial-gradient(circle, rgba(255,215,0,0.08) 0%, transparent 70%);">
                                 <i class="fas ${icon}" style="color: var(--primary); opacity: 0.8; filter: drop-shadow(0 0 20px rgba(255,215,0,0.2));"></i>
                              </div>`;
+            }
 
             card.innerHTML = `
                 <div class="card-image">
