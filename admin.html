@@ -516,7 +516,7 @@
         }
 
         function editProduct(id) {
-            const p = dataManager.getProducts().find(x => x.id === id);
+            const p = dataManager.getProducts().find(x => x.id == id);
             document.getElementById('edit-id').value = p.id;
             document.getElementById('p-name').value = p.name;
             document.getElementById('p-price').value = p.price;
