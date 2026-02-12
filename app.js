@@ -8,11 +8,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 2. SILENT BACKGROUND SYNC
     // This happens in the background without making the user wait
+    // 2. SILENT BACKGROUND SYNC
     if (typeof dataManager !== 'undefined' && dataManager.syncFromFirebase) {
         dataManager.syncFromFirebase().then(() => {
             renderMenu();
             loadSiteConfig();
-            console.log("Sync Complete: High Quality UI Ready.");
         });
     }
 
@@ -24,17 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-function showSkeletons() {
-    const container = document.getElementById('menu-container');
-    container.innerHTML = `
-        <h3 class="category-title skeleton" style="width: 200px; height: 30px; margin-bottom: 20px;"></h3>
-        <div class="menu-grid">
-            ${Array(4).fill(0).map(() => `
-                <div class="menu-card skeleton" style="height: 350px; border:none; opacity: 0.5;"></div>
-            `).join('')}
-        </div>
-    `;
-}
+
 
 let cart = []; // Now stores objects: { product, quantity }
 
@@ -68,8 +58,10 @@ function renderMenu() {
             // Ultra High Quality Image Handling
             let imageTag = `<div class="image-placeholder"><i class="fas fa-utensils"></i></div>`;
             if (product.image && product.image.length > 50) {
-                // If we have a real image, we show it with a fade effect
-                imageTag = `<img src="${product.image}" loading="lazy" onload="this.parentElement.classList.remove('image-loading')" alt="${product.name}">`;
+                // High-performance loading with seamless reveal
+                const tempImg = new Image();
+                tempImg.src = product.image;
+                imageTag = `<img src="${product.image}" loading="lazy" class="menu-image" onload="this.style.opacity=1" style="opacity:0; transition: opacity 1s ease" alt="${product.name}">`;
             } else {
                 let icon = 'fa-hamburger';
                 if (product.name.toLowerCase().includes('shawarma')) icon = 'fa-scroll';

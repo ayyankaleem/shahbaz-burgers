@@ -45,13 +45,15 @@ const dataManager = {
     async syncFromFirebase() {
         if (!USE_FIREBASE) return;
         try {
-            // 1. Sync Products
-            const prodSnap = await db.collection('products').get();
+            const [prodSnap, confSnap] = await Promise.all([
+                db.collection('products').get(),
+                db.collection('settings').doc('siteConfig').get()
+            ]);
+
+            // 1. Process Products
             if (prodSnap.empty) {
-                // Cloud is empty! Auto-upload defaults so the user doesn't have to type them
-                console.log("Cloud empty, uploading defaults...");
                 for (let item of DEFAULT_MENU) {
-                    await db.collection('products').doc(item.id.toString()).set(item);
+                    db.collection('products').doc(item.id.toString()).set(item);
                 }
                 localStorage.setItem('shahbaz_menu', JSON.stringify(DEFAULT_MENU));
             } else {
@@ -59,10 +61,9 @@ const dataManager = {
                 localStorage.setItem('shahbaz_menu', JSON.stringify(prods));
             }
 
-            // 2. Sync Config
-            const confSnap = await db.collection('settings').doc('siteConfig').get();
+            // 2. Process Config
             if (!confSnap.exists) {
-                await db.collection('settings').doc('siteConfig').set(DEFAULT_CONFIG);
+                db.collection('settings').doc('siteConfig').set(DEFAULT_CONFIG);
                 localStorage.setItem('shahbaz_config', JSON.stringify(DEFAULT_CONFIG));
             } else {
                 localStorage.setItem('shahbaz_config', JSON.stringify(confSnap.data()));
