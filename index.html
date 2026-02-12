@@ -67,21 +67,21 @@
                 <div class="stats">
                     <div class="stat-item">
                         <div style="display: flex; align-items: center; gap: 8px;">
-                            <i class="fas fa-users" style="color: var(--primary-color);"></i>
+                            <i class="fas fa-users" style="color: var(--primary);"></i>
                             <span class="stat-num">5k+</span>
                         </div>
                         <span class="stat-desc">Fans</span>
                     </div>
                     <div class="stat-item">
                         <div style="display: flex; align-items: center; gap: 8px;">
-                            <i class="fas fa-star" style="color: var(--primary-color);"></i>
+                            <i class="fas fa-star" style="color: var(--primary);"></i>
                             <span class="stat-num">4.9/5</span>
                         </div>
                         <span class="stat-desc">Quality</span>
                     </div>
                     <div class="stat-item">
                         <div style="display: flex; align-items: center; gap: 8px;">
-                            <i class="fas fa-motorcycle" style="color: var(--primary-color);"></i>
+                            <i class="fas fa-motorcycle" style="color: var(--primary);"></i>
                             <span class="stat-num">Fast</span>
                         </div>
                         <span class="stat-desc">Delivery</span>
@@ -113,62 +113,60 @@
     </section>
 
     <!-- Reviews Section -->
-    <section id="reviews" style="background-color: #121212; padding: 50px 0;">
-        <div class="container">
+    <section id="reviews" class="reviews-section">
+        <div class="container" style="position: relative; z-index: 2;">
             <div class="section-header">
-                <h2>Customer <span class="highlight">Reviews</span></h2>
-                <p>What our happy customers say.</p>
+                <span class="subtitle">Testimonials</span>
+                <h2>Customer <span class="highlight">Gossip</span></h2>
+                <p>What our real fans say about us.</p>
             </div>
-            <div id="reviews-container" style="display: flex; overflow-x: auto; padding-bottom: 20px; gap: 20px;">
+            <div id="reviews-container" class="reviews-container">
                 <!-- Reviews Rendered Here -->
             </div>
         </div>
     </section>
 
-
-
-
-    </div>
-    </section>
-
     <!-- Footer -->
     <footer>
-        <div class="container footer-container">
-            <div class="footer-col">
-                <h3>Shahbaz <span class="highlight">Bhai</span></h3>
-                <p>Fresh Burger & Shawarma. Serving the best fast food in town.</p>
-                <div class="social-links">
-                    <a href="#"><i class="fab fa-facebook-f"></i></a>
-                    <a href="#"><i class="fab fa-instagram"></i></a>
-                    <a href="#"><i class="fab fa-whatsapp"></i></a>
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <span class="footer-logo">Shahbaz <span class="highlight">Bhai</span></span>
+                    <p class="footer-desc">Freshly grilled, authentically seasoned. The legendary taste of WAPDA Town
+                        Lahore.</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-whatsapp"></i></a>
+                    </div>
+                </div>
+                <div class="footer-col">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="#home">Home</a></li>
+                        <li><a href="#menu">Menu</a></li>
+                        <li><a href="#about">About Us</a></li>
+                        <li><a href="#contact">Contact</a></li>
+                        <li><a href="/admin/index.html" style="color: var(--primary);"><i class="fas fa-lock"
+                                    style="margin-right: 5px;"></i>Admin Login</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col" id="contact">
+                    <h4>Contact Us</h4>
+                    <ul>
+                        <li><i class="fas fa-map-marker-alt"></i> E 2 market, WAPDA Town Lahore, Pakistan</li>
+                        <li><i class="fas fa-phone"></i> 0312-7631617</li>
+                        <li><i class="fas fa-hamburger"></i> Shahbaz Bhai Fresh Burger & Shawarma</li>
+                    </ul>
+                    <a href="https://www.google.com/maps/search/?api=1&query=E+2+market,+WAPDA+Town+Lahore,+Pakistan"
+                        target="_blank" class="btn btn-primary" style="margin-top: 15px; font-size: 0.8rem;">Get
+                        Directions
+                        <i class="fas fa-location-arrow"></i></a>
                 </div>
             </div>
-            <div class="footer-col">
-                <h4>Quick Links</h4>
-                <ul>
-                    <li><a href="#home">Home</a></li>
-                    <li><a href="#menu">Menu</a></li>
-                    <li><a href="#about">About Us</a></li>
-                    <li><a href="#contact">Contact</a></li>
-                    <li><a href="/admin/index.html" style="color: var(--primary);"><i class="fas fa-lock"
-                                style="margin-right: 5px;"></i>Admin Login</a></li>
-                </ul>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Shahbaz Bhai Fresh Burger & Shawarma. All rights reserved.</p>
             </div>
-            <div class="footer-col" id="contact">
-                <h4>Contact Us</h4>
-                <ul>
-                    <li><i class="fas fa-map-marker-alt"></i> E 2 market, WAPDA Town Lahore, Pakistan</li>
-                    <li><i class="fas fa-phone"></i> 0312-7631617</li>
-                    <li><i class="fas fa-hamburger"></i> Shahbaz Bhai Fresh Burger & Shawarma</li>
-                </ul>
-                <a href="https://www.google.com/maps/search/?api=1&query=E+2+market,+WAPDA+Town+Lahore,+Pakistan"
-                    target="_blank" class="btn btn-primary" style="margin-top: 15px; font-size: 0.8rem;">Get Directions
-                    <i class="fas fa-location-arrow"></i></a>
-            </div>
-        </div>
-        <div class="footer-bottom">
-            <p>&copy; 2026 Shahbaz Bhai Fresh Burger & Shawarma. All rights reserved.</p>
-        </div>
     </footer>
 
     <!-- Firebase SDKs -->

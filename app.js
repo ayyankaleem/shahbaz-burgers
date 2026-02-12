@@ -1,26 +1,27 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Check if we have cached products
-    const cachedProducts = dataManager.getProducts();
-    const isCacheEmpty = !localStorage.getItem('shahbaz_menu');
-
-    if (isCacheEmpty) {
-        showSkeletons();
-    } else {
-        renderMenu(); // Render from cache immediately (0 lag)
-    }
-
+    // 1. INSTANT RENDER (0 Second Lag)
+    // We render whatever we have (Cache or Defaults) immediately
+    renderMenu();
     loadSiteConfig();
     renderReviews();
     setupOrderLogic();
 
-    // 2. Background Sync from Cloud
+    // 2. SILENT BACKGROUND SYNC
+    // This happens in the background without making the user wait
     if (typeof dataManager !== 'undefined' && dataManager.syncFromFirebase) {
         dataManager.syncFromFirebase().then(() => {
-            // Re-render once cloud data arrives
             renderMenu();
             loadSiteConfig();
+            console.log("Sync Complete: High Quality UI Ready.");
         });
     }
+
+    // 3. Navbar Scroll Effect
+    window.addEventListener('scroll', () => {
+        const nav = document.querySelector('.navbar');
+        if (window.scrollY > 50) nav.classList.add('scrolled');
+        else nav.classList.remove('scrolled');
+    });
 });
 
 function showSkeletons() {
@@ -39,7 +40,9 @@ let cart = []; // Now stores objects: { product, quantity }
 
 function renderMenu() {
     const menuContainer = document.getElementById('menu-container');
+    if (!menuContainer) return;
     menuContainer.innerHTML = '';
+
     const products = dataManager.getProducts();
 
     const grouped = products.reduce((acc, product) => {
@@ -50,7 +53,7 @@ function renderMenu() {
 
     for (const [category, items] of Object.entries(grouped)) {
         const title = document.createElement('h3');
-        title.className = 'category-title';
+        title.className = 'category-title fade-in';
         title.innerHTML = `${category} <span class="highlight">${getCategoryIcon(category)}</span>`;
         menuContainer.appendChild(title);
 
@@ -60,26 +63,32 @@ function renderMenu() {
         items.forEach((product, index) => {
             const card = document.createElement('div');
             card.className = 'menu-card fade-in';
-            card.style.animationDelay = `${index * 0.1}s`; // Staggered entrance
+            card.style.animationDelay = `${index * 0.1}s`;
 
-            let imageContent = `<div class="image-placeholder"><i class="fas fa-utensils"></i></div>`;
-            if (product.image && product.image.length > 10) {
-                imageContent = `<div class="card-image"><img src="${product.image}" alt="${product.name}" style="width:100%; height:100%; object-fit:cover;"> <span class="price-tag">Rs. ${product.price}</span></div>`;
+            // Ultra High Quality Image Handling
+            let imageTag = `<div class="image-placeholder"><i class="fas fa-utensils"></i></div>`;
+            if (product.image && product.image.length > 50) {
+                // If we have a real image, we show it with a fade effect
+                imageTag = `<img src="${product.image}" loading="lazy" onload="this.parentElement.classList.remove('image-loading')" alt="${product.name}">`;
             } else {
-                let icon = 'fa-utensils';
-                if (product.name.toLowerCase().includes('burger')) icon = 'fa-hamburger';
+                let icon = 'fa-hamburger';
                 if (product.name.toLowerCase().includes('shawarma')) icon = 'fa-scroll';
-                if (product.name.toLowerCase().includes('fries')) icon = 'fa-french-fries';
-                imageContent = `<div class="card-image"><div class="image-placeholder"><i class="fas ${icon}"></i></div><span class="price-tag">Rs. ${product.price}</span></div>`;
+                imageTag = `<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:4rem;color:rgba(255,255,255,0.05)"><i class="fas ${icon}"></i></div>`;
             }
 
             card.innerHTML = `
-                ${imageContent}
+                <div class="card-image image-loading">
+                    ${imageTag}
+                    <span class="price-tag">Rs. ${product.price}</span>
+                </div>
                 <div class="card-content">
                     <h3>${product.name}</h3>
-                    <p class="description">${product.description}</p>
+                    <p class="description">${product.description || 'Freshly grilled with premium ingredients.'}</p>
                     <div class="card-footer">
-                        <button class="btn-icon" onclick="addToCart(${product.id})"><i class="fas fa-plus"></i></button>
+                        <span style="color:var(--primary); font-weight:700">Quick Serve</span>
+                        <button class="btn-add" onclick="addToCart('${product.id}')">
+                            <i class="fas fa-plus"></i>
+                        </button>
                     </div>
                 </div>
             `;
@@ -143,18 +152,17 @@ function renderReviews() {
 
         const div = document.createElement('div');
         div.className = 'review-card';
-        div.style.cssText = 'background: #1E1E1E; padding: 20px; border-radius: 10px; min-width: 300px; margin-right: 20px; border: 1px solid #333;';
         div.innerHTML = `
-            <div style="display: flex; align-items: center; margin-bottom: 10px;">
-                <div style="width: 40px; height: 40px; background: #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 10px; font-weight: bold; color: var(--primary-color);">
+            <div style="display: flex; align-items: center; margin-bottom: 20px; gap:15px;">
+                <div style="width: 50px; height: 50px; background: rgba(255,215,0,0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 800; color: var(--primary); font-size: 1.2rem;">
                     ${r.name.charAt(0)}
                 </div>
                 <div>
-                    <h4 style="margin: 0; color: #fff;">${r.name}</h4>
-                    <span style="font-size: 0.8rem;">${stars}</span>
+                    <h4 style="margin: 0; color: #fff; font-size:1.1rem;">${r.name}</h4>
+                    <span>${stars}</span>
                 </div>
             </div>
-            <p style="color: #ccc; font-size: 0.9rem; margin: 0;">"${r.text}"</p>
+            <p style="color: var(--text-dim); font-size: 1.1rem; line-height:1.6; font-style:italic;">"${r.text}"</p>
         `;
         container.appendChild(div);
     });
