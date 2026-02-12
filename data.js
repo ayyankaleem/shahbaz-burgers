@@ -23,7 +23,10 @@ const DEFAULT_CONFIG = {
     contactAddress: "E 2 market, WAPDA Town Lahore, Pakistan",
     shopName: "Shahbaz <span class=\"highlight\">Bhai</span>",
     heroImage: "",
-    logoImage: ""
+    logoImage: "",
+    facebookUrl: "#",
+    instagramUrl: "#",
+    whatsappUrl: "https://wa.me/923127631617"
 };
 
 const DEFAULT_REVIEWS = [

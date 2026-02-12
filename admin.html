@@ -278,6 +278,14 @@
                 <div class="form-group"><label>Hero Description</label><textarea id="c-heroDesc" rows="3"></textarea>
                 </div>
 
+                <h3 style="margin-top: 30px; color: var(--primary);">Social Media Links</h3>
+                <div class="form-group"><label>Facebook URL</label><input type="text" id="c-facebook"
+                        placeholder="https://facebook.com/yourpage"></div>
+                <div class="form-group"><label>Instagram URL</label><input type="text" id="c-instagram"
+                        placeholder="https://instagram.com/yourpage"></div>
+                <div class="form-group"><label>WhatsApp Number (with country code)</label><input type="text"
+                        id="c-whatsapp" placeholder="e.g. 923XXXXXXXXX"></div>
+
                 <h3 style="margin-top: 30px; color: var(--primary);">Hero Image (Premium Burger)</h3>
                 <div class="form-group">
                     <label>Upload Main Image</label>
@@ -626,6 +634,10 @@
             document.getElementById('c-heroSubtitle').value = c.heroSubtitle;
             document.getElementById('c-heroDesc').value = c.heroDescription;
 
+            document.getElementById('c-facebook').value = c.facebookUrl || '';
+            document.getElementById('c-instagram').value = c.instagramUrl || '';
+            document.getElementById('c-whatsapp').value = c.whatsappUrl ? c.whatsappUrl.replace('https://wa.me/', '') : '';
+
             document.getElementById('c-heroImage-base64').value = c.heroImage || '';
             if (c.heroImage) {
                 document.getElementById('hero-preview').src = c.heroImage;
@@ -648,7 +660,10 @@
                 heroSubtitle: document.getElementById('c-heroSubtitle').value,
                 heroDescription: document.getElementById('c-heroDesc').value,
                 heroImage: document.getElementById('c-heroImage-base64').value,
-                logoImage: document.getElementById('c-logoImage-base64').value
+                logoImage: document.getElementById('c-logoImage-base64').value,
+                facebookUrl: document.getElementById('c-facebook').value,
+                instagramUrl: document.getElementById('c-instagram').value,
+                whatsappUrl: document.getElementById('c-whatsapp').value ? 'https://wa.me/' + document.getElementById('c-whatsapp').value : '#'
             };
             dataManager.saveConfig(config);
             alert('Settings Saved! Refresh website to see changes.');

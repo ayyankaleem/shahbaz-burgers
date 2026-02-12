@@ -16,11 +16,23 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 3. Navbar Scroll Effect
+    // 3. Ultra-Dynamic Scroll Effect
+    let lastScroll = 0;
     window.addEventListener('scroll', () => {
+        const currentScroll = window.scrollY;
         const nav = document.querySelector('.navbar');
-        if (window.scrollY > 50) nav.classList.add('scrolled');
-        else nav.classList.remove('scrolled');
+        const floatingBtn = document.getElementById('floating-order');
+
+        // Hide navbar on scroll down, show on scroll up/top
+        if (currentScroll > 100) {
+            nav.classList.add('hidden');
+            floatingBtn.classList.add('active');
+        } else {
+            nav.classList.remove('hidden');
+            floatingBtn.classList.remove('active');
+        }
+
+        lastScroll = currentScroll;
     });
 });
 
@@ -55,21 +67,18 @@ function renderMenu() {
             card.className = 'menu-card fade-in';
             card.style.animationDelay = `${index * 0.1}s`;
 
-            // Ultra High Quality Image Handling
-            let imageTag = `<div class="image-placeholder"><i class="fas fa-utensils"></i></div>`;
-            if (product.image && product.image.length > 50) {
-                // High-performance loading with seamless reveal
-                const tempImg = new Image();
-                tempImg.src = product.image;
-                imageTag = `<img src="${product.image}" loading="lazy" class="menu-image" onload="this.style.opacity=1" style="opacity:0; transition: opacity 1s ease" alt="${product.name}">`;
-            } else {
-                let icon = 'fa-hamburger';
-                if (product.name.toLowerCase().includes('shawarma')) icon = 'fa-scroll';
-                imageTag = `<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:4rem;color:rgba(255,255,255,0.05)"><i class="fas ${icon}"></i></div>`;
-            }
+            // Premium Icon-Only Menu (Removing all other pics as requested)
+            let icon = 'fa-hamburger';
+            if (product.name.toLowerCase().includes('shawarma')) icon = 'fa-scroll';
+            if (product.name.toLowerCase().includes('sandwich')) icon = 'fa-bread-slice';
+            if (product.name.toLowerCase().includes('drink') || product.name.toLowerCase().includes('pepsi')) icon = 'fa-glass-whiskey';
+
+            const imageTag = `<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:6rem;background: radial-gradient(circle, rgba(255,215,0,0.08) 0%, transparent 70%);">
+                                <i class="fas ${icon}" style="color: var(--primary); opacity: 0.8; filter: drop-shadow(0 0 20px rgba(255,215,0,0.2));"></i>
+                             </div>`;
 
             card.innerHTML = `
-                <div class="card-image image-loading">
+                <div class="card-image">
                     ${imageTag}
                     <span class="price-tag">Rs. ${product.price}</span>
                 </div>
@@ -121,12 +130,20 @@ function loadSiteConfig() {
     }
 
     if (config.logoImage && config.logoImage.length > 10) {
-        // Only update Hero Logo Placeholder
         const heroLogo = document.getElementById('hero-logo-placeholder');
         if (heroLogo) {
             heroLogo.innerHTML = `<img src="${config.logoImage}" alt="Logo" style="height: 120px; object-fit: contain; display: block; margin-bottom: 20px;">`;
         }
     }
+
+    // Dynamic Social Links
+    const fbLink = document.getElementById('link-facebook');
+    const igLink = document.getElementById('link-instagram');
+    const waLink = document.getElementById('link-whatsapp');
+
+    if (fbLink) fbLink.href = config.facebookUrl || '#';
+    if (igLink) igLink.href = config.instagramUrl || '#';
+    if (waLink) waLink.href = config.whatsappUrl || '#';
 }
 
 function renderReviews() {
