@@ -1,6 +1,14 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Instant Render from Cache (No Lag)
-    renderMenu();
+    // 1. Check if we have cached products
+    const cachedProducts = dataManager.getProducts();
+    const isCacheEmpty = !localStorage.getItem('shahbaz_menu');
+
+    if (isCacheEmpty) {
+        showSkeletons();
+    } else {
+        renderMenu(); // Render from cache immediately (0 lag)
+    }
+
     loadSiteConfig();
     renderReviews();
     setupOrderLogic();
@@ -8,12 +16,24 @@ document.addEventListener('DOMContentLoaded', () => {
     // 2. Background Sync from Cloud
     if (typeof dataManager !== 'undefined' && dataManager.syncFromFirebase) {
         dataManager.syncFromFirebase().then(() => {
-            // Refresh with latest data from cloud
+            // Re-render once cloud data arrives
             renderMenu();
             loadSiteConfig();
         });
     }
 });
+
+function showSkeletons() {
+    const container = document.getElementById('menu-container');
+    container.innerHTML = `
+        <h3 class="category-title skeleton" style="width: 200px; height: 30px; margin-bottom: 20px;"></h3>
+        <div class="menu-grid">
+            ${Array(4).fill(0).map(() => `
+                <div class="menu-card skeleton" style="height: 350px; border:none; opacity: 0.5;"></div>
+            `).join('')}
+        </div>
+    `;
+}
 
 let cart = []; // Now stores objects: { product, quantity }
 
@@ -37,9 +57,10 @@ function renderMenu() {
         const grid = document.createElement('div');
         grid.className = 'menu-grid';
 
-        items.forEach(product => {
+        items.forEach((product, index) => {
             const card = document.createElement('div');
-            card.className = 'menu-card';
+            card.className = 'menu-card fade-in';
+            card.style.animationDelay = `${index * 0.1}s`; // Staggered entrance
 
             let imageContent = `<div class="image-placeholder"><i class="fas fa-utensils"></i></div>`;
             if (product.image && product.image.length > 10) {

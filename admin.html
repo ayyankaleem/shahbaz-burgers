@@ -429,8 +429,8 @@
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, width, height);
 
-                    // Compress to JPEG with 0.7 quality
-                    const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+                    // Compress to JPEG with 0.8 quality for better visual appeal
+                    const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
                     callback(dataUrl);
                 }
             }
@@ -440,7 +440,7 @@
         function handleImageUpload() {
             const file = document.getElementById('p-file').files[0];
             if (file) {
-                compressImage(file, 800, function (base64) {
+                compressImage(file, 1000, function (base64) {
                     document.getElementById('p-image-base64').value = base64;
                     document.getElementById('image-preview').src = base64;
                     document.getElementById('image-preview').style.display = 'block';

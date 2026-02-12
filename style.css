@@ -19,6 +19,42 @@
     --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
+/* Skeleton Loader */
+@keyframes shimmer {
+    0% {
+        background-position: -1000px 0;
+    }
+
+    100% {
+        background-position: 1000px 0;
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in {
+    animation: fadeIn 0.8s ease-out forwards;
+}
+
+.skeleton {
+    background: #1a1a1a;
+    background-image: linear-gradient(90deg, #1a1a1a 0px, #222 50%, #1a1a1a 100%);
+    background-size: 1000px 100%;
+    animation: shimmer 2s infinite linear;
+    border-radius: 10px;
+}
+
+
 * {
     margin: 0;
     padding: 0;
@@ -325,18 +361,29 @@ p {
     background-color: var(--card-bg);
     border-radius: var(--border-radius);
     overflow: hidden;
-    transition: var(--transition);
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
     border: 1px solid rgba(255, 255, 255, 0.05);
     position: relative;
     display: flex;
     flex-direction: column;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
 }
 
 .menu-card:hover {
-    transform: translateY(-8px);
-    box-shadow: var(--shadow);
-    border-color: rgba(255, 193, 7, 0.4);
+    transform: translateY(-15px) scale(1.02);
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8), 0 0 30px rgba(255, 193, 7, 0.2);
+    border-color: var(--primary-color);
+    z-index: 10;
 }
+
+.card-image img {
+    transition: transform 0.8s ease;
+}
+
+.menu-card:hover .card-image img {
+    transform: scale(1.15);
+}
+
 
 .card-image {
     position: relative;
